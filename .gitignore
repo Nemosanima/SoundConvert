@@ -160,3 +160,4 @@ cython_debug/
 .idea/
 .DS_Store
 t2.db
+audiofiles/
