@@ -1,7 +1,7 @@
 import os
 import uuid
 
-import soundfile as sf
+from moviepy.editor import AudioFileClip
 from fastapi import Depends, FastAPI, File, HTTPException, UploadFile, status
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
@@ -83,29 +83,35 @@ def convert_audio_recording(
         db: Session = Depends(get_db)
 ):
     if check_id_and_uuid_token(db, user_id, user_uuid_token):
-        new_name = generate_uuid(wav_file.filename) + '.mp3'
         output_dir = "./audiofiles"
-        mp3_file = os.path.join(output_dir, new_name)
-        try:
-            audio, sample_rate = sf.read(wav_file.file)
-            os.makedirs(output_dir, exist_ok=True)
+        os.makedirs(output_dir, exist_ok=True)
 
-            with open(mp3_file, 'wb') as f:
-                sf.write(f, audio, sample_rate, format="MP3")
-
-        except:
+        wav_filename = wav_file.filename
+        if not wav_filename.endswith(".wav"):
             raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail='Ошибка. Проверьте, что формат файла WAV'
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail='Некорректный формат файла. Ожидается файл с расширением .wav'
             )
+
+        new_name = generate_uuid(wav_filename) + '.mp3'
+        wav_path = os.path.join(output_dir, wav_filename)
+        mp3_path = os.path.join(output_dir, new_name)
+        with open(wav_path, 'wb') as f:
+            contents = wav_file.file.read()
+            f.write(contents)
+        audio = AudioFileClip(wav_path)
+        audio.write_audiofile(mp3_path)
+        os.remove(wav_path)
+
         audio_recording = models.AudioRecording(
             uuid_name=new_name,
-            path=mp3_file,
+            path=mp3_path,
             user_id=user_id
         )
         db.add(audio_recording)
         db.commit()
         db.refresh(audio_recording)
+
         audio_id = audio_recording.id
         audio_user_id = audio_recording.user_id
         download_url = f'http://localhost/record?id={audio_id}&user={audio_user_id}'
