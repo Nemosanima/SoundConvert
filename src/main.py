@@ -82,7 +82,7 @@ def convert_audio_recording(
         user_uuid_token: str,
         wav_file: UploadFile = File(...),
         db: Session = Depends(get_db)
-) -> Union[dict, HTTPException]:
+):
     if check_id_and_uuid_token(db, user_id, user_uuid_token):
         output_dir = "./audiofiles"
         os.makedirs(output_dir, exist_ok=True)
