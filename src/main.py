@@ -5,6 +5,7 @@ from moviepy.editor import AudioFileClip
 from fastapi import Depends, FastAPI, File, HTTPException, UploadFile, status
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
+from typing import Union
 
 from . import models, schemas
 from .database import SessionLocal, engine
@@ -14,11 +15,11 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title='SoundConvert',
-    description='API, который конвертирует аудиозапись из формата wav в mp3'
+    description='SoundConvert - api, который умеет конвертировать аудиофайлы из формата wav в mp3'
 )
 
 
-def get_db():
+def get_db() -> Session:
     db = SessionLocal()
     try:
         yield db
@@ -26,12 +27,12 @@ def get_db():
         db.close()
 
 
-def generate_uuid(name):
+def generate_uuid(name: str) -> str:
     uuid_token = str(uuid.uuid5(uuid.NAMESPACE_DNS, name))
     return uuid_token
 
 
-def save_user_to_db(db, username, uuid_token):
+def save_user_to_db(db: Session, username: str, uuid_token: str) -> models.User:
     new_user = models.User(
         username=username,
         uuid_token=uuid_token
@@ -42,7 +43,7 @@ def save_user_to_db(db, username, uuid_token):
     return new_user
 
 
-def check_unique_username(db, username):
+def check_unique_username(db: Session, username: str) -> Union[str, HTTPException]:
     user = db.query(models.User).filter_by(username=username).first()
     if not user:
         return username
@@ -52,7 +53,7 @@ def check_unique_username(db, username):
     )
 
 
-def check_id_and_uuid_token(db, user_id, uuid_token):
+def check_id_and_uuid_token(db: Session, user_id: int, uuid_token: str) -> Union[bool, HTTPException]:
     user = db.query(models.User).filter_by(id=user_id).first()
     if not user:
         raise HTTPException(
@@ -69,7 +70,7 @@ def check_id_and_uuid_token(db, user_id, uuid_token):
 
 
 @app.post('/create_user', response_model=schemas.ResponseUser, tags=['Create user'])
-def create_user(data: schemas.CreateUser, db: Session = Depends(get_db)):
+def create_user(data: schemas.CreateUser, db: Session = Depends(get_db)) -> models.User:
     username = check_unique_username(db, data.username)
     uuid_token = generate_uuid(username)
     return save_user_to_db(db, username, uuid_token)
@@ -81,7 +82,7 @@ def convert_audio_recording(
         user_uuid_token: str,
         wav_file: UploadFile = File(...),
         db: Session = Depends(get_db)
-):
+) -> Union[dict, HTTPException]:
     if check_id_and_uuid_token(db, user_id, user_uuid_token):
         output_dir = "./audiofiles"
         os.makedirs(output_dir, exist_ok=True)
@@ -119,7 +120,7 @@ def convert_audio_recording(
 
 
 @app.get('/record', tags=['Download audio recording'])
-def download_audio_recording(id: int, user: int, db: Session = Depends(get_db)):
+def download_audio_recording(id: int, user: int, db: Session = Depends(get_db)) -> FileResponse:
     audio_recording = db.query(models.AudioRecording).filter(
         models.AudioRecording.id == id,
         models.AudioRecording.user_id == user).first()

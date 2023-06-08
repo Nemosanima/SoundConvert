@@ -65,4 +65,4 @@ wav_file
 ```
 http://localhost/record?id=2&user=1
 ```
-#### В папке wav_examples есть файлы в формате wav для теста
+#### В папке wav_examples есть файлы в формате wav для тестирования
