@@ -26,3 +26,43 @@ docker-compose up -d --build
 http://localhost/docs  # Swagger
 http://localhost/redoc # ReDoc
 ```
+## Краткий обзор
+
+#### Создать пользователя. http метод post
+```
+http://localhost/create_user
+```
+```
+# Request body
+{
+  "username": "Nemosanima"
+}
+```
+```
+# Response body
+{
+  "id": 10,
+  "uuid_token": "155ab1cd-8b92-578b-93a3-ba87d1244f2a"
+}
+```
+#### Конвертировать аудиофайл из формата wav в mp3. http метод post
+```
+http://localhost/convert_audio_recording
+```
+```
+# Parameters
+user_id
+user_uuid_token
+wav_file
+```
+```
+# Response body
+{
+  "download_url": "http://localhost/record?id=2&user=1"
+}
+```
+#### Скачать аудиофайл в формате mp3. http метод get
+```
+http://localhost/record?id=2&user=1
+```
+#### В папке wav_examples есть файлы в формате wav для теста
