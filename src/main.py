@@ -13,7 +13,8 @@ models.Base.metadata.create_all(bind=engine)
 
 
 app = FastAPI(
-    title='Mp3'
+    title='SoundConvert',
+    description='API, который конвертирует аудиозапись из формата wav в mp3'
 )
 
 
@@ -74,8 +75,8 @@ def create_user(data: schemas.CreateUser, db: Session = Depends(get_db)):
     return save_user_to_db(db, username, uuid_token)
 
 
-@app.post('/create_audio_recording', tags=['Create audio recording'])
-def create_audio_recording(
+@app.post('/convert_audio_recording', tags=['Convert audio recording'])
+def convert_audio_recording(
         user_id: int,
         user_uuid_token: str,
         wav_file: UploadFile = File(...),
@@ -95,7 +96,7 @@ def create_audio_recording(
         except:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail='Ошибка на сервере'
+                detail='Ошибка. Проверьте, что формат файла WAV'
             )
         audio_recording = models.AudioRecording(
             uuid_name=new_name,
