@@ -29,9 +29,9 @@ http://localhost/redoc # ReDoc
 ```
 ## Краткий обзор
 
-Все запросы можно сделать из докементации Swagger
+Все запросы можно сделать из документации Swagger
 
-
+![convert_audio_recording](https://github.com/Nemosanima/SoundConvert/blob/main/images/convert_audio_recording.png)
 
 #### Создать пользователя. http метод post
 ```
