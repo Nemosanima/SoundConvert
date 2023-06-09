@@ -29,6 +29,10 @@ http://localhost/redoc # ReDoc
 ```
 ## Краткий обзор
 
+Все запросы можно сделать из докементации Swagger
+
+
+
 #### Создать пользователя. http метод post
 ```
 http://localhost/create_user
