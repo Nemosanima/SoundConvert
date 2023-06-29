@@ -1,4 +1,4 @@
-# sound-convert-api
+# sound-convert
 
 API, который умеет конвертировать аудиофайлы из формата wav в mp3.
 
